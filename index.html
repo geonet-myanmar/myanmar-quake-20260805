@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Myanmar Earthquake & Tectonic Lineaments Web Map</title>
+  <meta name="description" content="Interactive GIS Web Map displaying the August 5, 2026 Myanmar Earthquake epicenter and 2011 Myanmar Tectonic Lineaments." />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  
+  <script type="module" crossorigin src="./assets/index-CnJjsV6K.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DcVUlTUv.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo-icon">
+          <i data-lucide="activity"></i>
+        </div>
+        <div class="title-container">
+          <h1>Myanmar Seismology & Tectonics</h1>
+          <span class="badge badge-pulse">August 5, 2026 M4.9 Event</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-focus-quake" class="btn btn-secondary" title="Zoom to Epicenter">
+          <i data-lucide="crosshair"></i> <span>Focus Epicenter</span>
+        </button>
+        <button id="btn-fit-bounds" class="btn btn-secondary" title="View Full Extent">
+          <i data-lucide="map-pin-off"></i> <span>Fit Myanmar</span>
+        </button>
+        <button id="btn-open-bulletin" class="btn btn-primary" title="View Original DMH Bulletin Image">
+          <i data-lucide="image"></i> <span>DMH Bulletin</span>
+        </button>
+        <button id="btn-theme-toggle" class="btn btn-icon" title="Toggle Light/Dark Theme">
+          <i data-lucide="sun" class="sun-icon"></i>
+          <i data-lucide="moon" class="moon-icon"></i>
+        </button>
+        <button id="btn-sidebar-toggle" class="btn btn-icon" title="Toggle Sidebar">
+          <i data-lucide="panel-right-close"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-container">
+      <!-- Leaflet Map Container -->
+      <div id="map" class="map-container"></div>
+
+      <!-- Floating Sidebar Drawer -->
+      <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+          <h2><i data-lucide="layers"></i> Map Controls & Analytics</h2>
+          <button id="btn-close-sidebar" class="btn-close">&times;</button>
+        </div>
+
+        <div class="sidebar-content">
+          <!-- Earthquake Incident Overview Card -->
+          <section class="card quake-card">
+            <div class="card-header">
+              <span class="quake-tag">Earthquake Bulletin</span>
+              <span class="quake-mag">4.9 M</span>
+            </div>
+            <h3 class="card-title">22 Miles W of Pale, Myanmar</h3>
+            
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">Date</span>
+                <span class="value">5.8.2026</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Time (MST)</span>
+                <span class="value">06:41:57</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Coordinates</span>
+                <span class="value">21.91° N, 94.52° E</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Focal Depth</span>
+                <span class="value">89 km <small>(Intermediate)</small></span>
+              </div>
+              <div class="info-item full-width">
+                <span class="label">Agency</span>
+                <span class="value">DMH Seismological Division, Nay Pyi Taw</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Spatial Analysis Card -->
+          <section class="card spatial-card">
+            <div class="card-header">
+              <h3><i data-lucide="compass"></i> Spatial Proximity Analysis</h3>
+            </div>
+            
+            <div class="metric-box">
+              <div class="metric-icon">
+                <i data-lucide="route"></i>
+              </div>
+              <div class="metric-data">
+                <span class="metric-label">Distance to Nearest Lineament</span>
+                <span id="nearest-distance" class="metric-value">Calculating...</span>
+              </div>
+            </div>
+
+            <div class="metric-row">
+              <div class="sub-metric">
+                <span class="sub-label">Lineament Single Class Features</span>
+                <span id="total-features-count" class="sub-value">--</span>
+              </div>
+              <div class="sub-metric">
+                <span class="sub-label">Total Fault Line Length</span>
+                <span id="total-fault-length" class="sub-value">--</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Tectonic Lineaments Style & Layer Controls -->
+          <section class="card control-card">
+            <div class="card-header">
+              <h3><i data-lucide="sliders"></i> Single Class Lineament Style</h3>
+            </div>
+            
+            <p class="card-description">
+              Tectonic lineaments are represented as a unified single class. Customize visibility and stroke appearance below.
+            </p>
+
+            <div class="control-group">
+              <label for="chk-lineaments" class="checkbox-label">
+                <input type="checkbox" id="chk-lineaments" checked />
+                <span>Show Tectonic Lineaments</span>
+              </label>
+            </div>
+
+            <div class="control-group">
+              <label>Preset Color Theme</label>
+              <div class="color-presets">
+                <button class="preset-btn active" data-color="#ff3b30" style="background: #ff3b30;" title="Crimson"></button>
+                <button class="preset-btn" data-color="#ff9500" style="background: #ff9500;" title="Amber"></button>
+                <button class="preset-btn" data-color="#00f2fe" style="background: #00f2fe;" title="Neon Cyan"></button>
+                <button class="preset-btn" data-color="#34c759" style="background: #34c759;" title="Emerald"></button>
+                <button class="preset-btn" data-color="#af52de" style="background: #af52de;" title="Purple"></button>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <div class="slider-header">
+                <label for="range-weight">Line Thickness</label>
+                <span id="val-weight">2.5 px</span>
+              </div>
+              <input type="range" id="range-weight" min="1" max="8" step="0.5" value="2.5" />
+            </div>
+
+            <div class="control-group">
+              <div class="slider-header">
+                <label for="range-opacity">Line Opacity</label>
+                <span id="val-opacity">85%</span>
+              </div>
+              <input type="range" id="range-opacity" min="0.1" max="1" step="0.05" value="0.85" />
+            </div>
+          </section>
+
+          <!-- Basemap Selector Card -->
+          <section class="card basemap-card">
+            <div class="card-header">
+              <h3><i data-lucide="map"></i> Base Map Layers</h3>
+            </div>
+            
+            <div class="basemap-grid">
+              <button class="basemap-option active" data-basemap="dark">
+                <div class="basemap-preview preview-dark"></div>
+                <span>CartoDB Dark</span>
+              </button>
+              <button class="basemap-option" data-basemap="light">
+                <div class="basemap-preview preview-light"></div>
+                <span>CartoDB Light</span>
+              </button>
+              <button class="basemap-option" data-basemap="satellite">
+                <div class="basemap-preview preview-satellite"></div>
+                <span>ESRI Satellite</span>
+              </button>
+              <button class="basemap-option" data-basemap="osm">
+                <div class="basemap-preview preview-osm"></div>
+                <span>OpenStreetMap</span>
+              </button>
+            </div>
+          </section>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Original Quake Bulletin Modal -->
+    <div id="bulletin-modal" class="modal">
+      <div class="modal-overlay" id="modal-backdrop"></div>
+      <div class="modal-content glass-panel">
+        <div class="modal-header">
+          <h3><i data-lucide="file-text"></i> DMH Official Earthquake Bulletin</h3>
+          <button id="btn-close-modal" class="btn-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <img src="./assets/quake-FptaVhdK.jpg" alt="DMH Seismological Bulletin August 5 2026" class="bulletin-img" />
+        </div>
+        <div class="modal-footer">
+          <span>Source: Department of Meteorology and Hydrology, Seismological Division, Nay Pyi Taw</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
