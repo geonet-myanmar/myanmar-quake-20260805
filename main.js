@@ -1,6 +1,7 @@
 import L from 'leaflet';
 import * as turf from '@turf/turf';
 import { createIcons, Activity, Crosshair, MapPinOff, Image, Sun, Moon, PanelRightClose, Layers, Compass, Route, Sliders, Map, FileText } from 'lucide';
+import geojsonImport from './Myanmar_Tectonic_Map_2011.geojson';
 
 // Initialize Lucide Icons
 createIcons({
@@ -122,10 +123,7 @@ function createQuakeMarker() {
 // Load and Render Tectonic Lineaments (Single Class)
 async function loadTectonicGeoJSON() {
   try {
-    const response = await fetch('./Myanmar_Tectonic_Map_2011.geojson');
-    if (!response.ok) throw new Error('Failed to load GeoJSON file');
-    
-    geojsonData = await response.json();
+    geojsonData = geojsonImport;
 
     // Render as SINGLE CLASS (No sub-classification per prompt instructions)
     lineamentLayer = L.geoJSON(geojsonData, {
@@ -328,7 +326,13 @@ function closeBulletinModal() {
 }
 
 // Initialize on DOM Content Loaded
-document.addEventListener('DOMContentLoaded', () => {
+function startApp() {
   initMap();
   setupEventListeners();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startApp);
+} else {
+  startApp();
+}
